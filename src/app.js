@@ -48,7 +48,7 @@ app.use(leaveFormRouter);
 app.use(midadminLoginRouter);
 app.use(midadminRouter);
 app.use(adminRouter);
-app.use(forgotPasswordRouter);
+// app.use(forgotPasswordRouter);
 app.use(otpTimerRouter);
 app.use(report);
 
@@ -59,6 +59,26 @@ app.get("/delete/:id", async (req, res) => {
   const users = await User.find({});
 
   res.redirect("/admin");
+});
+
+app.post("/forgotPassword", async (req, res) => {
+  try {
+    const user = await User.findByCredentials(req.body.email);
+    const otp = Math.random().toString().slice(2, 8);
+    otpResetSessions.push({ email: user.email, otp });
+    sendEmail("Password Reset OTP", otp, user.email);
+    otpResetSessions.push({ email: user.email, otp, startTime: Date.now() });
+
+    const token = await user.generateAuthToken();
+    res.cookie("auth_token", token);
+    res.redirect("/");
+  } catch (e) {
+    res.redirect("/login?error=1");
+  }
+});
+
+app.get("/forgotPassword", unauth, (req, res) => {
+  res.render("forgotPassword", { type: "user", error: req.query.error });
 });
 
 //Cron job which runs every minute to delete expired OTP sessions
