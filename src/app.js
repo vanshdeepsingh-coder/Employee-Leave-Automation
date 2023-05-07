@@ -19,6 +19,7 @@ const leaveFormRouter = require("./routers/leaveForm");
 const adminRouter = require("./routers/admin");
 const forgotPasswordRouter = require("./routers/forgotPassword");
 const otpTimerRouter = require("./routers/otpTimer");
+const report = require("./routers/report");
 
 const otpResetSessions = [{ email: "", otp: "", startTime: "" }];
 
@@ -49,6 +50,7 @@ app.use(midadminRouter);
 app.use(adminRouter);
 app.use(forgotPasswordRouter);
 app.use(otpTimerRouter);
+app.use(report);
 
 app.get("/delete/:id", async (req, res) => {
   const { id } = req.params;

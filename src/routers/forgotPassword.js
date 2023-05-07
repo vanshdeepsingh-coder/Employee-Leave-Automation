@@ -1,7 +1,7 @@
 const express = require("express");
 const User = require("../models/user");
 const unauth = require("../middlewares/unauth");
-const { otpSender } = require("../middlewares/sendOtp");
+const { sendEmail } = require("../middlewares/sendEmail");
 const { otpResetSessions } = require("../app");
 
 const router = new express.Router();
@@ -15,7 +15,7 @@ router.post("/forgotPassword", async (req, res) => {
     const user = await User.findByCredentials(req.body.email);
     const otp = Math.random().toString().slice(2, 8);
     otpResetSessions.push({ email: user.email, otp });
-    otpSender("Password Reset OTP", otp, user.email);
+    sendEmail("Password Reset OTP", otp, user.email);
     otpResetSessions.push({ email: user.email, otp, startTime: Date.now() });
 
     const token = await user.generateAuthToken();
