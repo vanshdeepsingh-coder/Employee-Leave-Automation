@@ -21,6 +21,10 @@ const forgotPasswordRouter = require("./routers/forgotPassword");
 const otpTimerRouter = require("./routers/otpTimer");
 const report = require("./routers/report");
 
+//forgot password middlewares
+const unauth = require("./middlewares/unauth");
+const { sendEmail } = require("./middlewares/sendEmail");
+
 const otpResetSessions = [{ email: "", otp: "", startTime: "" }];
 
 const app = express();
@@ -49,7 +53,7 @@ app.use(midadminLoginRouter);
 app.use(midadminRouter);
 app.use(adminRouter);
 // app.use(forgotPasswordRouter);
-app.use(otpTimerRouter);
+// app.use(otpTimerRouter);
 app.use(report);
 
 app.get("/delete/:id", async (req, res) => {
@@ -74,6 +78,7 @@ app.post("/forgotPassword", async (req, res) => {
     res.redirect("/");
   } catch (e) {
     res.redirect("/login?error=1");
+    console.log(e);
   }
 });
 
