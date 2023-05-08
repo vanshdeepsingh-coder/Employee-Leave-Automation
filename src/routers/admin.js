@@ -8,7 +8,7 @@ const router = new express.Router()
 
 router.get('/admin', auth, async (req, res) => {
     
-    const users = await User.find({})
+    const users = await User.find({}).sort({name:'asc'})
 
     res.render("admin", {users: users})
 })
