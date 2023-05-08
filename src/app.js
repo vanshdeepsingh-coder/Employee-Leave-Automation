@@ -70,22 +70,17 @@ app.post("/forgotPassword", async (req, res) => {
   // console.log(req.body.email)
   try {
     const user = await User.findOne({ email: req.body.email });
-    if (user === null) {
-      const otp = Math.random().toString().slice(2, 8);
-      // otpResetSessions.push({ email: user.email, otp });
-      const sended = await sendEmail("Password Reset OTP", otp, user.email);
+    const otp = Math.random().toString().slice(2, 8);
+    // otpResetSessions.push({ email: user.email, otp });
+    const sended = await sendEmail("Password Reset OTP", otp, user.email);
 
-      otpResetSessions.push({ email: user.email, otp, startTime: Date.now() });
+    otpResetSessions.push({ email: user.email, otp, startTime: Date.now() });
 
-      // console.log(otpResetSessions)
+    // console.log(otpResetSessions)
 
-      const token = await user.generateAuthToken();
-      res.cookie("auth_token", token);
-      res.redirect(`/otpTimer?email=${req.body.email}`);
-    } else {
-      res.redirect("/login?error=1");
-      console.log(e);
-    }
+    const token = await user.generateAuthToken();
+    res.cookie("auth_token", token);
+    res.redirect(`/otpTimer?email=${req.body.email}`);
   } catch (e) {
     res.redirect("/login?error=1");
     console.log(e);
