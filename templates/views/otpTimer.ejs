@@ -24,22 +24,14 @@
                         </h2>
                     </div>   
 
-                    <% if (otpError) { %>
-                        <div class="alert alert-danger" role="alert">
-                            Invalid OTP. Please enter a valid OTP.
-                        </div>
-                    <% } else if (otpExpired) { %>
-                        <div class="alert alert-danger" role="alert">
-                            OTP expired. Please request a new OTP.
-                        </div>
-                    <% } %>
+                   
 
                     <form method="POST">
                         <div class="mb-3">
-                            <input type="email" id="otp" name="otp" placeholder="Enter OTP" maxlength="6">
+                            <input type="text" id="otp" name="otp" placeholder="Enter OTP" maxlength="6">
                         </div>
                         <% if (!otpExpired) { %>
-                        <input type="submit" onclick="validateOTP()" class="btn btn-primary" value="Verify">
+                        <input type="submit" onsubmit="validateOTP()" class="btn btn-primary" value="Verify">
                         <% } %>
 
                     </form>
@@ -60,15 +52,18 @@
         </div>
     </div>
     <script>
-        function validateOTP() {
+        function validateOTP(e) {
+            
+            e.preventDefault()
             var enteredOTP = document.getElementById("otp").value;
+            console.log(enteredOTP)
             var otp = '<%= otp %>'; // get the OTP value from EJS template
 
             if (enteredOTP === otp) {
                 // Redirect to the new password page
                 window.location.href = "/newPassword";
             } else {
-                alert("Invalid OTP. Please enter a valid OTP.");
+                {% comment %} alert("Invalid OTP. Please enter a valid OTP."); {% endcomment %}
             }
         }
     </script>

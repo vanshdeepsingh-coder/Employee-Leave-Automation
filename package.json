@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/app.js",
+    "start": "nodemon src/app.js",
     "dev": "env-cmd -f ./dev.env nodemon src/app.js -e js,ejs,css",
     "play": "env-cmd -f ./dev.env node src/app.js"
   },

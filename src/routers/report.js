@@ -9,7 +9,6 @@ require("dotenv").config({ path: "./dev.env" });
 
 router.get("/report", auth, async (req, res) => {
   const leaves = await Leave.find({});
-  console.log(leaves);
   leaves.reverse();
   res.render("report", { leaves: leaves });
 });
