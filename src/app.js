@@ -23,7 +23,7 @@ const report = require("./routers/report");
 
 //forgot password middlewares
 const unauth = require("./middlewares/unauth");
-const  sendEmail  = require("./middlewares/sendEmail");
+const sendEmail = require("./middlewares/sendEmail");
 
 const otpResetSessions = [{ email: "", otp: "", startTime: "" }];
 
@@ -66,18 +66,18 @@ app.get("/delete/:id", async (req, res) => {
 });
 
 app.post("/forgotPassword", async (req, res) => {
-  console.log("check 1")
+  console.log("check 1");
   // console.log(req.body.email)
   try {
-    const user = await User.findOne({email: req.body.email});
+    const user = await User.findOne({ email: req.body.email });
     const otp = Math.random().toString().slice(2, 8);
     // otpResetSessions.push({ email: user.email, otp });
-    const sended=await sendEmail("Password Reset OTP", otp, user.email);
-    
+    const sended = await sendEmail("Password Reset OTP", otp, user.email);
+
     otpResetSessions.push({ email: user.email, otp, startTime: Date.now() });
 
     // console.log(otpResetSessions)
-    
+
     const token = await user.generateAuthToken();
     res.cookie("auth_token", token);
     res.redirect(`/otpTimer?email=${req.body.email}`);
@@ -88,54 +88,50 @@ app.post("/forgotPassword", async (req, res) => {
 });
 
 app.get("/forgotPassword", unauth, (req, res) => {
-
   res.render("forgotPassword", { type: "user", error: req.query.error });
 });
 
-app.get("/newPassword",(req,res)=>{
-  res.render("newpassword")
-})
+app.get("/newPassword", (req, res) => {
+  res.render("newpassword");
+});
 
-app.post("/newPassword",async (req,res)=>{
-  console.log(req.body.password)
-  console.log(req.query.email )
+app.post("/newPassword", async (req, res) => {
+  console.log(req.body.password);
+  console.log(req.query.email);
   try {
-    User.findOneAndUpdate({email: req.query.email }, 
-      {password:req.body.password}, null, function (err, docs) {
-      if (err){
-          console.log(err)
-      }
-      else{
-          console.log("Original Doc : ",docs);
-      }
-   });
-   const user = await User.findOne({email: req.query.email});
-   console.log(user)
-   res.redirect("/");
-  
+    let updateResponse = await User.findOneAndUpdate(
+      { email: req.query.email },
+      { password: req.body.password }
+    );
+    if (updateResponse.error === null) {
+      console.log("updated password successfully");
+    }
+    const user = await User.findOne({ email: req.query.email });
+    console.log(user);
+    res.redirect("/");
   } catch (e) {
     res.redirect("/login?error=1");
     console.log(e);
   }
-})
+});
 
 app.get("/otpTimer", function (req, res) {
   // Render the OTP Timer page using EJS template engine
   // console.log(req.query.email)
-   console.log(otpResetSessions)
+  console.log(otpResetSessions);
   res.render("otpTimer", { otpError: false, otpExpired: false, otp: null });
 });
 
 app.post("/otpTimer", function (req, res) {
-  console.log(otpResetSessions)
+  console.log(otpResetSessions);
   const enteredOTP = req.body.otp;
-  console.log(req.body.otp)
-  const email=req.query.email
-  
+  console.log(req.body.otp);
+  const email = req.query.email;
+
   const userPasswordResetSession = otpResetSessions.filter((userSession) => {
-    return userSession.email ===email;
+    return userSession.email === email;
   });
-  console.log(userPasswordResetSession)
+  console.log(userPasswordResetSession);
   const otp = userPasswordResetSession[0].otp;
 
   if (enteredOTP === otp) {

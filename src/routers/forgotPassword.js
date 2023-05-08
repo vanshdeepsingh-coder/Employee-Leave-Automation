@@ -2,7 +2,6 @@ const express = require("express");
 const User = require("../models/user");
 const unauth = require("../middlewares/unauth");
 const { sendEmail } = require("../middlewares/sendEmail");
-const { otpResetSessions } = require("../app");
 
 const router = new express.Router();
 
