@@ -19,13 +19,12 @@ const leaveFormRouter = require("./routers/leaveForm");
 const adminRouter = require("./routers/admin");
 const forgotPasswordRouter = require("./routers/forgotPassword");
 // const otpTimerRouter = require("./routers/otpTimer");
+const { PasswordResetSessionModel } = require("./models/passwordreset");
 const report = require("./routers/report");
 
 //forgot password middlewares
 const unauth = require("./middlewares/unauth");
 const sendEmail = require("./middlewares/sendEmail");
-
-const otpResetSessions = [{ email: "", otp: "", startTime: "" }];
 
 const app = express();
 app.set("view engine", "ejs");
@@ -71,10 +70,13 @@ app.post("/forgotPassword", async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
     const otp = Math.random().toString().slice(2, 8);
-    // otpResetSessions.push({ email: user.email, otp });
     const sended = await sendEmail("Password Reset OTP", otp, user.email);
 
-    otpResetSessions.push({ email: user.email, otp, startTime: Date.now() });
+    let passwordResponse = await PasswordResetSessionModel.create({
+      email: user.email,
+      otp: otp,
+      startTime: Date.now(),
+    });
 
     // console.log(otpResetSessions)
 
@@ -82,7 +84,7 @@ app.post("/forgotPassword", async (req, res) => {
     res.cookie("auth_token", token);
     res.redirect(`/otpTimer?email=${req.body.email}`);
   } catch (e) {
-    res.redirect("/login?error=1");
+    res.render("/login?error=1");
     console.log(e);
   }
 });
@@ -115,15 +117,27 @@ app.post("/newPassword", async (req, res) => {
   }
 });
 
-app.get("/otpTimer", function (req, res) {
+app.get("/otpTimer", async function (req, res) {
   // Render the OTP Timer page using EJS template engine
   // console.log(req.query.email)
+  let otpResetSessions = await PasswordResetSessionModel.find({});
+
+  if (otpResetSessions.length === 0) {
+    console.log("no sessions");
+    res.redirect("/forgotPassword?error=1");
+    return;
+  }
+
   console.log(otpResetSessions);
   res.render("otpTimer", { otpError: false, otpExpired: false, otp: null });
 });
 
-app.post("/otpTimer", function (req, res) {
+app.post("/otpTimer", async function (req, res) {
+  let otpResetSessions = await PasswordResetSessionModel.find({});
   console.log(otpResetSessions);
+
+  if (otpResetSessions.length === 0) console.log("no sessions");
+
   const enteredOTP = req.body.otp;
   console.log(req.body.otp);
   const email = req.query.email;
@@ -146,6 +160,8 @@ app.post("/otpTimer", function (req, res) {
 cron.schedule(
   "1 * * * * *",
   async () => {
+    let otpResetSessions = await PasswordResetSessionModel.find({});
+    if (otpResetSessions.length === 0) return;
     otpResetSessions.forEach((userSession, index) => {
       if (Date.now() - userSession.startTime > 60000) {
         otpResetSessions.splice(index, 1);
@@ -201,5 +217,3 @@ cron.schedule(
 app.listen(process.env.PORT, () => {
   console.log("Server is up!~");
 });
-
-exports.module = otpResetSessions;
