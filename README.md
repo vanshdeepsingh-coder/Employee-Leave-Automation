@@ -13,3 +13,4 @@ approval is a hierarchial process.
 ◦ Worked as a team member and added features like register/delete employees, setting up mail function for
 receiving otp’s, reset login password, generating pdf report of leave records and more.
 
+
